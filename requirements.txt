@@ -1,0 +1,15 @@
+faiss-cpu==1.13.2
+fastapi==0.135.3
+langchain==1.2.10
+langchain-classic==1.0.1
+langchain-community==0.4.1
+langchain-core==1.2.17
+langchain-experimental==0.4.1
+langchain-openai==1.1.10
+langchain-text-splitters==1.1.1
+openai==2.24.0
+pydantic==2.12.5
+pydantic-settings==2.13.1
+pydantic_core==2.41.5
+uvicorn==0.44.0
+youtube-transcript-api==1.2.4
