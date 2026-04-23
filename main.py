@@ -1,8 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI , HTTPException
 from fastapi.middleware.cors import CORSMiddleware 
 import rag
 from pydantic import BaseModel
-
 app = FastAPI()
 
 app.add_middleware(
@@ -16,16 +15,28 @@ app.add_middleware(
 class AskRequest(BaseModel):
     video_id : str
     question : str
+    session_id : str
 
+#adding session id - so need a new request body for build_index as well
 
-@app.post("/index/{video_id}")
-def build_index(video_id):
-    rag.build_index(video_id)
-    return "Indexing done"
+class IndexRequest(BaseModel):
+    video_id : str
+    session_id : str
+
+@app.post("/index")
+def build_index(request : IndexRequest):
+    try:
+        rag.build_index(request.session_id , request.video_id)
+        return "Indexing done"
+    except Exception as e:
+        raise HTTPException (status_code=500 , detail=str(e))
 
 @app.post("/ask")
 def ask_question(request: AskRequest):
-    return rag.ask_question(request.video_id, request.question)
+    try:
+        return rag.ask_question(request.video_id, request.question , request.session_id)
+    except Exception as e:
+        raise HTTPException(status_code=500 , detail=str(e))
 
 
 

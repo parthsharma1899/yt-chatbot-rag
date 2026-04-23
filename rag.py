@@ -137,10 +137,10 @@ def format_docs(retrieved_docs):
 
 index_cache = {}
 
-def build_index(video_id):
+def build_index(session_id , video_id):
 
-    if(video_id in index_cache):
-        return index_cache[video_id]
+    if((session_id , video_id) in index_cache):
+        return index_cache[(session_id , video_id)]
 
     #getting transcript
     try:
@@ -213,11 +213,11 @@ def build_index(video_id):
     # Stage 3: Feed context + question into prompt → LLM → parse output
     main_chain = parallel_chain | prompt | llm | StrOutputParser()
 
-    index_cache[video_id] = {
+    index_cache[(session_id , video_id)] = {
         "main_chain": main_chain,
         "chat_history": ChatMessageHistory()
     }
-    return index_cache[video_id]
+    return index_cache[(session_id , video_id)]
 
 
 def format_chat_history(chat_history, k=5):
@@ -237,13 +237,13 @@ def format_chat_history(chat_history, k=5):
     return "\n".join(formatted)
 
 
-def ask_question(video_id , question):
-    if(video_id not in index_cache):
-        build_index(video_id)
-    main_chain = index_cache[video_id]["main_chain"]
-    chat_history = index_cache[video_id]["chat_history"]
+def ask_question(video_id , question , session_id):
+    if((session_id , video_id) not in index_cache):
+        build_index(session_id , video_id)
+    main_chain = index_cache[(session_id , video_id)]["main_chain"]
+    chat_history = index_cache[(session_id , video_id)]["chat_history"]
     history_str = format_chat_history(chat_history)
-    standalone_q = question 
+    standalone_q = question
     if(history_str): standalone_q = condense_chain.invoke({"question" : question , "chat_history" : history_str})
     answer = main_chain.invoke({"question" : standalone_q})
     chat_history.add_user_message(question)
